@@ -1,86 +1,129 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>INVENTARIOME</title>
-    <link rel="stylesheet" href="css/estilos.css">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700,800&display=swap" rel="stylesheet"> 
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LIA BibliotecApp</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
-
 <body>
+  <div class="container">
     <header>
-        <nav>
-            <a href="#">Inicio</a>
-            <a href="#">Acerca de</a>
-            <a href="#">Portafolio</a>
-            <a href="#">Servicios</a>
-            <a href="#">Buscar</a>
-        </nav>
-        <section class="textos-header">
-            <h1>Equipos de Computo</h1>
-            <h2>INVENTARIO</h2>
-        </section>
-        <div class="wave" style="height: 150px; overflow: hidden;"><svg viewBox="0 0 500 150" preserveAspectRatio="none"
-                style="height: 100%; width: 100%;">
-                <path d="M0.00,49.98 C150.00,150.00 349.20,-50.00 500.00,49.98 L500.00,150.00 L0.00,150.00 Z"
-                    style="stroke: none; fill: #fff;"></path>
-            </svg></div>
+      <h1>LIA BibliotecApp</h1>
+      <p>Tu rincón para leer, aprender y compartir libros en PDF</p>
+      <div id="user-panel"></div>
     </header>
-                </div>
-            </div>
-        </section>
-        <section class="portafolio">
-            <div class="contenedor">
-                <h2 class="titulo">Portafolio</h2>
-                <div class="galeria-port">
-                    <div class="imagen-port">
-                        <img src="img/img1.jpg" alt="">
-                        <div class="hover-galeria">
-                            <img src="img/icono1.png" alt="">
-                            <p>Celulares</p>
-                        </div>
-                    </div>
-                    <div class="imagen-port">
-                        <img src="img/img2.jpg" alt="">
-                        <div class="hover-galeria">
-                            <img src="img/icono1.png" alt="">
-                            <p>Laptops</p>
-                        </div>
-                    </div>
-                    <div class="imagen-port">
-                        <img src="img/img3.jpg" alt="">
-                        <div class="hover-galeria">
-                            <img src="img/icono1.png" alt="">
-                            <p>Desktop</p>
-                        </div>
-                    </div>
-                    <div class="imagen-port">
-                        <img src="img/img1.jpg" alt="">
-                        <div class="hover-galeria">
-                            <img src="img/icono1.png" alt="">
-                            <p>AIO</p>
-                        </div>
-                    </div>
-                    <div class="imagen-port">
-                        <img src="img/img4.jpg" alt="">
-                        <div class="hover-galeria">
-                            <img src="img/icono1.png" alt="">
-                            <p>Tabletas</p>
-                        </div>
-                    </div>    
-                    </div>
-                </div>
-            </div>
+    
+    <nav id="main-nav" class="hidden">
+      <a href="#" onclick="showSection('acerca')" id="nav-acerca">Acerca de</a>
+      <a href="#" onclick="showSection('biblioteca')" id="nav-biblioteca">Biblioteca</a>
+      <a href="#" onclick="showSection('subir')" id="nav-subir">Subir Libro</a>
+    </nav>
 
-            
-            </div>
+    <main>
+      <!-- Sección de Login -->
+      <section id="login" class="active">
+        <h2>Iniciar Sesión</h2>
+        <form id="form-login">
+          <input type="email" name="email" placeholder="Correo electrónico" required>
+          <input type="password" name="password" placeholder="Contraseña" required>
+          <button type="submit">Entrar</button>
+        </form>
+        <div id="login-error"></div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <p>¿No tienes cuenta? <a href="#" onclick="showRegister()" style="color: #4CAF50; text-decoration: none;">Regístrate aquí</a></p>
         </div>
-        <h2 class="titulo-final">&copy; IT INFRASTRUCTURA | MARATHON ELECTRIC</h2>
+      </section>
+
+      <!-- Sección de Registro -->
+      <section id="register">
+        <h2>Crear Cuenta</h2>
+        <form id="form-register">
+          <input type="text" name="nombre" placeholder="Nombre completo" required>
+          <input type="email" name="email" placeholder="Correo electrónico" required>
+          <input type="password" name="password" placeholder="Contraseña (mín. 6 caracteres)" required>
+          <button type="submit">Registrarse</button>
+        </form>
+        <div id="register-error"></div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <p>¿Ya tienes cuenta? <a href="#" onclick="showLogin()" style="color: #4CAF50; text-decoration: none;">Inicia sesión</a></p>
+        </div>
+      </section>
+
+      <!-- Sección Acerca de -->
+      <section id="acerca">
+        <h2>Acerca de la App</h2>
+        <p style="text-align: center; font-size: 1.1em; line-height: 1.8;">
+          BibliotecApp es una aplicación web inspirada en el <strong>ODS 4</strong> de la ONU, cuyo objetivo es promover el acceso a la lectura infantil de forma digital. Aquí los usuarios pueden leer libros infantiles en PDF o subir los suyos para compartirlos con otros.
+        </p>
+        <div style="margin-top: 30px; text-align: center;">
+          <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border-radius: 15px; margin: 10px;">
+            <h3>📚 Lectura Digital</h3>
+            <p>Acceso fácil a libros infantiles</p>
+          </div>
+          <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #FF6B6B, #ee5a52); color: white; border-radius: 15px; margin: 10px;">
+            <h3>🌍 ODS 4</h3>
+            <p>Educación de calidad para todos</p>
+          </div>
+          <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 15px; margin: 10px;">
+            <h3>📤 Compartir</h3>
+            <p>Sube y comparte tus libros</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección Biblioteca -->
+      <section id="biblioteca">
+        <h2>Biblioteca Digital</h2>
+        <div id="loading" class="hidden">
+          <p style="text-align: center;">Cargando libros...</p>
+        </div>
+        <ul id="lista-libros"></ul>
+      </section>
+
+      <!-- Sección Subir Libro -->
+      <section id="subir">
+        <h2>Sube tu propio libro</h2>
+        <form id="form-subir">
+          <input type="text" name="titulo" placeholder="Título del libro" required>
+          <input type="text" name="autor" placeholder="Autor" required>
+          <textarea name="descripcion" placeholder="Descripción del libro" rows="3"></textarea>
+          <input type="file" name="archivo" accept="application/pdf" required>
+          <button type="submit">Subir</button>
+        </form>
+        <div id="subir-mensaje"></div>
+        <div id="upload-progress" class="hidden">
+          <div class="progress-bar">
+            <div id="progress-fill"></div>
+          </div>
+          <p id="progress-text">Subiendo...</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      &copy; 2025 Rockets | Proyecto educativo basado en ODS 4
     </footer>
+  </div>
+
+  <script src="firebase_config.js"></script>
+  <script src="script.js"></script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('serviceWorker.js')
+        .then(reg => console.log('SW registrado', reg))
+        .catch(err => console.error('SW falló', err));
+    }
+  </script>
 </body>
-
 </html>
-
