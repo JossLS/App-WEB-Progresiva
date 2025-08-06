@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LIA BibliotecApp</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>LIA BibliotecApp</h1>
+      <p>Tu rincón para leer, aprender y compartir libros en PDF</p>
+      <div id="user-panel"></div>
+      
+      <!-- Botón para habilitar notificaciones -->
+      <div id="notification-panel" class="hidden" style="margin-top: 15px;">
+        <button id="enable-notifications" onclick="solicitarPermisosNotificacion()" style="background: linear-gradient(45deg, #FF6B6B, #ee5a52); padding: 8px 16px; font-size: 14px; width: auto;">
+          🔔 Habilitar Notificaciones
+        </button>
+      </div>
+    </header>
+    
+    <nav id="main-nav" class="hidden">
+      <a href="#" onclick="showSection('acerca')" id="nav-acerca">Acerca de</a>
+      <a href="#" onclick="showSection('biblioteca')" id="nav-biblioteca">Biblioteca</a>
+      <a href="#" onclick="showSection('subir')" id="nav-subir">Subir Libro</a>
+      <a href="#" onclick="showSection('buzon')" id="nav-buzon">Buzón</a>
+    </nav>
+
+    <main>
+      <!-- Sección de Login -->
+      <section id="login" class="active">
+        <h2>Iniciar Sesión</h2>
+        <form id="form-login">
+          <input type="email" name="email" placeholder="Correo electrónico" required>
+          <input type="password" name="password" placeholder="Contraseña" required>
+          <button type="submit">Entrar</button>
+        </form>
+        <div id="login-error"></div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <p>¿No tienes cuenta? <a href="#" onclick="showRegister()" style="color: #4CAF50; text-decoration: none;">Regístrate aquí</a></p>
+        </div>
+      </section>
+
+      <!-- Sección de Registro -->
+      <section id="register">
+        <h2>Crear Cuenta</h2>
+        <form id="form-register">
+          <input type="text" name="nombre" placeholder="Nombre completo" required>
+          <input type="email" name="email" placeholder="Correo electrónico" required>
+          <input type="password" name="password" placeholder="Contraseña (mín. 6 caracteres)" required>
+          <button type="submit">Registrarse</button>
+        </form>
+        <div id="register-error"></div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <p>¿Ya tienes cuenta? <a href="#" onclick="showLogin()" style="color: #4CAF50; text-decoration: none;">Inicia sesión</a></p>
+        </div>
+      </section>
+
+      <!-- Sección Acerca de -->
+      <section id="acerca">
+        <h2>Acerca de la App</h2>
+        <p style="text-align: center; font-size: 1.1em; line-height: 1.8;">
+          BibliotecApp es una aplicación web inspirada en el <strong>ODS 4</strong> de la ONU, cuyo objetivo es promover el acceso a la lectura infantil de forma digital. Aquí los usuarios pueden leer libros infantiles en PDF o subir los suyos para compartirlos con otros.
+        </p>
+        <div style="margin-top: 30px; text-align: center;">
+          <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border-radius: 15px; margin: 10px;">
+            <h3>📚 Lectura Digital</h3>
+            <p>Acceso fácil a libros infantiles</p>
+          </div>
+          <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #FF6B6B, #ee5a52); color: white; border-radius: 15px; margin: 10px;">
+            <h3>🌍 ODS 4</h3>
+            <p>Educación de calidad para todos</p>
+          </div>
+          <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 15px; margin: 10px;">
+            <h3>📤 Compartir</h3>
+            <p>Sube y comparte tus libros</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección Biblioteca -->
+      <section id="biblioteca">
+        <h2>Biblioteca Digital</h2>
+        <div id="loading" class="hidden">
+          <p style="text-align: center;">Cargando libros...</p>
+        </div>
+        <ul id="lista-libros"></ul>
+      </section>
+
+      <!-- Sección Subir Libro -->
+       <form id="form-subir">
+  <input type="text" name="titulo" placeholder="Título del libro" required>
+  <input type="text" name="autor" placeholder="Autor" required>
+  <textarea name="descripcion" placeholder="Descripción (opcional)"></textarea>
+  <textarea name="contenido" placeholder="Contenido del libro (opcional si se usa enlace)"></textarea>
+  <input type="text" name="link" placeholder="Enlace al libro (PDF en línea, opcional si se usa contenido)">
+  <button type="submit">Subir</button>
+  <div id="subir-mensaje"></div>
+</form>
+
+      <!--<section id="subir">
+        <h2>Sube tu propio libro</h2>
+        <form id="form-subir">
+          <input type="text" name="titulo" placeholder="Título del libro" required>
+          <input type="text" name="autor" placeholder="Autor" required>
+          <textarea name="descripcion" placeholder="Descripción del libro" rows="3"></textarea>
+          <input type="file" name="archivo" accept="application/pdf" required>
+          <button type="submit">Subir</button>
+        </form>
+        <div id="subir-mensaje"></div>
+        <div id="upload-progress" class="hidden">
+          <div class="progress-bar">
+            <div id="progress-fill"></div>
+          </div>
+          <p id="progress-text">Subiendo...</p>
+        </div>
+      </section>
+
+      <!-- Sección Buzón de Sugerencias -->
+      <section id="buzon">
+        <h2>📮 Buzón de Sugerencias y Quejas</h2>
+        <p style="text-align: center; margin-bottom: 30px; color: #666;">
+          Tu opinión es muy importante para nosotros. Compártenos tus ideas para mejorar la plataforma.
+        </p>
+        
+        <form id="form-buzon">
+          <input type="text" name="nombre" placeholder="Tu nombre completo" required>
+          <input type="email" name="correo" placeholder="Tu correo electrónico" required>
+          <input type="tel" name="telefono" placeholder="Tu número de teléfono (opcional)">
+          
+          <div style="margin: 15px 0;">
+            <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #4CAF50;">
+              Tipo de mensaje:
+            </label>
+            <div style="display: flex; gap: 20px; justify-content: center;">
+              <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="radio" name="tipo" value="sugerencia" required style="margin-right: 8px;">
+                💡 Sugerencia
+              </label>
+              <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="radio" name="tipo" value="queja" required style="margin-right: 8px;">
+                😟 Queja  
+              </label>
+              <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="radio" name="tipo" value="felicitacion" required style="margin-right: 8px;">
+                😊 Felicitación
+              </label>
+            </div>
+          </div>
+          
+          <textarea name="mensaje" placeholder="Escribe tu mensaje aquí..." rows="6" required></textarea>
+          
+          <button type="submit">📤 Enviar Mensaje</button>
+        </form>
+        <div id="buzon-mensaje"></div>
+        
+        <!-- Estadísticas del buzón -->
+        <div id="buzon-stats" style="margin-top: 30px; text-align: center;">
+          <h3 style="color: #4CAF50; margin-bottom: 15px;">📊 Estadísticas</h3>
+          <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div class="stat-card">
+              <div class="stat-number" id="total-mensajes">0</div>
+              <div class="stat-label">Total Mensajes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="total-sugerencias">0</div>
+              <div class="stat-label">Sugerencias</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="total-quejas">0</div>
+              <div class="stat-label">Quejas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="total-felicitaciones">0</div>
+              <div class="stat-label">Felicitaciones</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      &copy; 2025 LinguaTech Kids | Proyecto educativo basado en ODS 4
+    </footer>
+  </div>
+
+  <script src="firebase_config.js"></script>
+  <script src="script.js"></script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('serviceWorker.js')
+        .then(reg => console.log('SW registrado', reg))
+        .catch(err => console.error('SW falló', err));
+    }
+  </script>
+</body>
+</html>
